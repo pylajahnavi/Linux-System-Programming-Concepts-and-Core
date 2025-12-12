@@ -1,0 +1,11 @@
+1.  Explain the concept of Process Creation in Operating System?
+    It is a mechanism by operating system, from which it creates a new process from an existing process. i.e., Parent -> Child
+    -> Parent request for process creation
+       UNIX/LINUX: fork() system call is used.
+       Windows: CreateProcess()
+    -> Kernel allocates a new Process Control Block.
+    -> Kernel allocates the memory for the new process.  Linux uses copy-on-write technique to avoid immediate copying the entire address space, whereas windows loads the executable into a fresh address space.
+    -> Child inherits resources from parent process.
+    -> Schedular adds the new process to the ready queue.
+    -> Parent and child begin execution.
+
