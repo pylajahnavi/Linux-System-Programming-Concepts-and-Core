@@ -9,3 +9,102 @@
     -> Schedular adds the new process to the ready queue.
     -> Parent and child begin execution.
 
+2. Differentiate between the fork() and exec() system calls.
+   fork(): Creates a new process within an existing process, which results in process within another process i.e., Parent and Child Process.
+   -> Both parent and child continue executing the same code after the fork.
+   -> Returns: 0 to the child process , Child’s PID to the parent, 1 on failure.
+   -> Child gets a copy of the parent’s memory (using copy‑on‑write).
+   -> File descriptors are duplicated from parent's process control block
+   exec(): Replaces the current process image with the new process image.
+   -> The process ID  stays the same, but the program running inside it changes.
+   -> The original code is completely replaced. Execution starts from the new program’s main().
+   -> If the program fails then it returns -1
+   -> Entire memory space is replaced.
+   -> Open file descriptors may remain open unless marked close-on-exec.
+
+3. Write a C program to demonstrate the use of fork() system call.
+   #include<stdio.h>
+   #include<unistd.h>
+   void main(){
+    int pid = fork();
+    if(pid < 0)
+       printf("Program fails");
+    else if(pid == 0)
+       printf("Child Process is running\n);
+    else
+       printf("Parent Process is running\n);
+   }
+
+4. What is the purpose of the wait() system call in process management? 
+   Primary purpose of wait() system call is to make a parent process pause until one of its child processes finishes execution.
+   Why it is needed?
+   1) Prevents Zombie Processes
+   -> When a child process terminates, it still keeps an entry in the process table (a zombie) until the parent collects its exit status.
+   -> wait() allows the parent to retrieve the child’s exit status, removing the zombie entry.
+   2) Ensures Proper Synchronization
+   -> Without wait(), the parent might finish execution before the child, leading to unpredictable behavior.
+   -> wait() ensures the parent waits for the child to complete before continuing.
+   3) Returns Information About Child Termination.
+   -> wait() provides the PID of the terminated child.
+
+5. Describe the role of the exec() family of functions in process management. 
+   Basically, exec() family of calls plays a cruical role in replcing the current process image with the new process image.
+   -> Used after fork() system call
+   -> does not create a new process as well as does not return on success.
+   -> It also allows passing arugments and environment variables.
+   -> It also enables program loading and context-switching.
+   -> Because exec keeps the same PID:
+         --Parent-child relationships remain intact.
+         --The parent can still use  to collect the child’s exit status.
+
+6. Write a C program to illustrate the use of the execvp() function. 
+   #include <stdio.h>
+   #include <unistd.h>
+   #include <sys/types.h>
+   #include <sys/wait.h>
+   int main() {
+    pid_t pid = fork();
+    if (pid < 0) {
+        perror("fork failed");
+        return 1;
+    }
+    if (pid == 0) {
+        // Child process
+        char *args[] = {"ls", "-l", NULL};  // Command and arguments
+        printf("Child: Executing ls -l using execvp()\n");
+        execvp(args[0], args);
+        // execvp() only returns if it fails
+        perror("execvp failed");
+        return 1;
+    } 
+    else {
+        // Parent process
+        wait(NULL);
+        printf("Parent: Child process finished.\n");
+    }
+    return 0;
+   }
+
+7. How does the vfork() system call differ from fork()? 
+   fork(): Creates a process within another process, i.e., creates a child process within the parent process
+   -> On failure returns -1, on Succes returns 0 for child process, and returns greater than 0 if it a parent process.
+   -> Child process gets seperate copy of parent's process address space.
+   -> Parent process and child process both run concurrently.
+   vfork(): Creates a process within another process similar to fork()
+   -> But there is no copy or duplication of address space of parent memory.
+   -> Parent and child have independent addresses.
+   -> Parent process is suspended until the child calls exec()
+   -> On failure returns -1, on Succes returns 0 for child process, and returns greater than 0 if it a parent process.
+   -> There is a disadvantage that a child process might modify the data of parent process.
+
+8. Discuss the significance of the getpid() and getppid() system calls. 
+   getpid(): It returns the process identifier of calling process.
+   -> Every process has unique process identifier.
+   -> This helps the OS and other processes track, manage, and control running programs.
+   getppid(): It returns the parent's process identifier of a calling process.
+   -> This helps a process know which process created it.
+   -> Child processes often need to communicate with or report back to their parent thus it helps in process synchronization and coordination.
+
+   
+   
+
