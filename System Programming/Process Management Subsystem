@@ -105,6 +105,56 @@
    -> This helps a process know which process created it.
    -> Child processes often need to communicate with or report back to their parent thus it helps in process synchronization and coordination.
 
+9. Explain the concept of process termination in UNIX-like operating systems.
+   A process in a UNIX-like system is an instance of a running program. Termination occurs when a process has finished its execution or is 
+   explicitly stopped by itself or by another process. The operating system handles this carefully to ensure proper resource management and to 
+   communicate completion status to other processes.
+   Mechanisms of Process Termination
+   1. Normal Termination: A process can terminate itself voluntarily by calling the exit() system call. When doing so, it provides an exit status 
+  (an integer value) to indicate success (0) or failure (non-zero) of execution. The kernel records this exit status so that the parent process can 
+  retrieve it using the wait() or waitpid() system calls.
+  2. Signal-induced Termination: Processes can be terminated by signals sent by other processes or by the kernel. Common signals include:
+  ->SIGKILL: Forces immediate termination, cannot be caught or ignored.
+  ->SIGTERM: Requests graceful termination, which the process can handle and perform cleanup before exiting.
+  ->SIGINT: Sent typically by a user pressing Ctrl+C in a terminal to interrupt a process.
+  3. Error-induced Termination: If a process executes an illegal operation, such as dividing by zero or accessing invalid memory, the kernel will 
+  terminate the process and may generate a core dump for debugging purposes.
    
-   
+10. Write a program in C to create a child process using fork() and print its PID. 
+    #include<stdio.h>
+    #include<unistd.h>
+    #include<sys/types.h>
+    void main()
+     {
+      int pid = fork();
+      if(pid < 0)
+      printf("Error in process creation\n");
+      if(pid ==0){
+      printf("Child Process is running with PID: %d abd PPID: %d\n", getpid(), getppid());
+      }
+      else{
+      printf("Parent Process is running with PID: %d\n", getpid());
+     }
 
+11. Describe the process hierarchy in UNIX-like operating systems.
+    1. Root Process:
+    The hierarchy originates from the init process or systemd (for modern os) which is assigned PID 1. This process is created by kernal during system bootup
+    and remains running throughout the system uptime. 
+    2. Parent and Child Process:
+    Every process has a parent process and may have zero or more child processes. When a process creates another process using the fork() system call, 
+    the newly created process is the child, and the original process is the parent. The child process inherits certain attributes from the parent, 
+    like environment variables and open file descriptors.
+    3. Process Tree Structure:
+    The hierarchy forms a tree-like structure, often visualized as a process tree, where the root init process sits at the top, 
+    and all other processes are descendants. Commands like ps -ef --forest or pstree can be used to visualize this tree.
+    4. Orphan and Zombie process: 
+    Orphan processes are child processes whose parent has terminated. In UNIX, these processes are reassigned to the init/systemd process, ensuring proper cleanup.
+    Zombie processes occur when a child has finished execution but still has an entry in the process table because the parent has not yet 
+    read its exit status. init automatically reaps such processes if the parent fails to do so.
+    5. Process IDs (PID) and Parent Process IDs (PPID):
+    Each process is uniquely identified by a PID, and a PPID points to its parent. This relationship helps manage signals, 
+    process termination, and resource cleanup in the hierarchy.
+    6. Shell and User Processes:
+    User-level processes typically descend from the shell process that the user invokes (bash, zsh, etc.). 
+    These shell processes themselves are children of login processes like getty or session managers.
+   
